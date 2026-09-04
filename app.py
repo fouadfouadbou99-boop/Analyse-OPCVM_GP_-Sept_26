@@ -206,4 +206,4 @@ if uploaded_file:
     # SHARPE
     # ------------------------------------------
 
-    st.subheader("📊 Ratio
+    st.subheader("📊 Ratio de Sharpe")
