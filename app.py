@@ -15,9 +15,9 @@ from reportlab.platypus import (
 from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet
 
-# ----------------------------------------------------
-# CONFIGURATION
-# ----------------------------------------------------
+# =====================================================
+# CONFIG
+# =====================================================
 
 st.set_page_config(
     page_title="OPCVM Analytics",
@@ -25,49 +25,53 @@ st.set_page_config(
     layout="wide"
 )
 
-# ----------------------------------------------------
-# HEADER
-# ----------------------------------------------------
-
-st.title("📈 OPCVM Analytics")
-
-st.markdown("""
-Tableau de bord de suivi des OPCVM Actions
-
-• Performance  
-• Risque  
-• Sharpe  
-• Treynor  
-• Information Ratio  
-• Export Excel  
-• Export PDF
-""")
-
-# ----------------------------------------------------
+# =====================================================
 # SIDEBAR
-# ----------------------------------------------------
+# =====================================================
 
 with st.sidebar:
 
-    st.header("Paramètres")
+    st.title("📈 OPCVM Analytics")
+
+    st.markdown("---")
+
+    st.subheader("Paramètres")
 
     st.metric(
         "Taux sans risque",
         "2.25 %"
     )
 
-# ----------------------------------------------------
-# IMPORT EXCEL
-# ----------------------------------------------------
+# =====================================================
+# HEADER
+# =====================================================
+
+st.title("📈 OPCVM Analytics")
+
+st.markdown("""
+### Tableau de bord OPCVM Actions
+
+- Performance
+- Risque
+- Sharpe
+- Treynor
+- Information Ratio
+- Export Excel
+- Export PDF
+""")
+
+# =====================================================
+# UPLOAD
+# =====================================================
 
 uploaded_file = st.file_uploader(
     "Importer le fichier Excel",
     type=["xlsx"]
 )
 
-# ----------------------------------------------------
-# TRAITEMENT
-# ----------------------------------------------------
+# =====================================================
+# PROCESS
+# =====================================================
 
 if uploaded_file:
 
@@ -77,9 +81,9 @@ if uploaded_file:
         header=None
     )
 
-    # --------------------------------------------
-    # LECTURE DES METRIQUES
-    # --------------------------------------------
+    # =================================================
+    # EXTRACTION METRICS
+    # =================================================
 
     funds = metrics.iloc[1, 1:16].tolist()
 
@@ -103,10 +107,6 @@ if uploaded_file:
 
     var95 = metrics.iloc[11, 1:16].astype(float)
 
-    # --------------------------------------------
-    # TABLEAU
-    # --------------------------------------------
-
     ranking = pd.DataFrame({
 
         "Fonds": funds,
@@ -122,9 +122,9 @@ if uploaded_file:
 
     })
 
-    # --------------------------------------------
+    # =================================================
     # SCORE GLOBAL
-    # --------------------------------------------
+    # =================================================
 
     ranking["Score"] = (
 
@@ -143,12 +143,14 @@ if uploaded_file:
 
     ranking["Rang"] = range(
         1,
-        len(ranking) + 1
+        len(ranking)+1
     )
 
-    # --------------------------------------------
+    # =================================================
     # KPI
-    # --------------------------------------------
+    # =================================================
+
+    st.markdown("---")
 
     best_fund = ranking.iloc[0]["Fonds"]
 
@@ -158,9 +160,7 @@ if uploaded_file:
 
     best_ir = ranking["IR"].max()
 
-    st.markdown("---")
-
-    c1, c2, c3, c4 = st.columns(4)
+    c1,c2,c3,c4 = st.columns(4)
 
     c1.metric(
         "🏆 Meilleur OPCVM",
@@ -182,9 +182,9 @@ if uploaded_file:
         f"{best_ir:.2f}"
     )
 
-    # --------------------------------------------
+    # =================================================
     # TOP 3
-    # --------------------------------------------
+    # =================================================
 
     st.markdown("---")
 
@@ -192,55 +192,41 @@ if uploaded_file:
 
     top3 = ranking.head(3)
 
-    col1, col2, col3 = st.columns(3)
+    cols = st.columns(3)
 
     for col, (_, row) in zip(
-        [col1, col2, col3],
+        cols,
         top3.iterrows()
     ):
 
         col.metric(
-            label=f"#{row['Rang']} {row['Fonds']}",
-            value=f"{row['Perf YTD']:.2%}"
+            f"#{row['Rang']} {row['Fonds']}",
+            f"{row['Perf YTD']:.2%}"
         )
 
-    # --------------------------------------------
-    # TABLEAU FORMATÉ
-    # --------------------------------------------
-
-    ranking_display = ranking.copy()
-
-    for col in [
-        "Perf YTD",
-        "Perf Annualisée",
-        "Volatilité",
-        "Tracking Error",
-        "Treynor",
-        "VaR95"
-    ]:
-
-        ranking_display[col] = ranking_display[col].map(
-            lambda x: f"{x:.2%}"
-        )
-
-    for col in [
-        "Sharpe",
-        "IR",
-        "Beta",
-        "Score"
-    ]:
-
-        ranking_display[col] = ranking_display[col].map(
-            lambda x: f"{x:.2f}"
-        )
+    # =================================================
+    # TABLEAU CLASSEMENT
+    # =================================================
 
     st.markdown("---")
 
     st.subheader("🏆 Classement")
 
-    st.dataframe(
-        ranking_display,
-        width="stretch"
-    )
+    ranking_display = ranking.copy()
 
-    # ------
+    ranking_display = ranking_display[
+        [
+            "Rang",
+            "Fonds",
+            "Perf YTD",
+            "Perf Annualisée",
+            "Volatilité",
+            "Sharpe",
+            "Treynor",
+            "IR"
+        ]
+    ]
+
+    ranking_display["Perf YTD"] = (
+        ranking_display["Perf YTD"]
+        .map(lambda x: f"{x:.2%}
