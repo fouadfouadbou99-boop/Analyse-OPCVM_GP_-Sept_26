@@ -22,7 +22,11 @@ if uploaded_file:
 
         df = pd.read_excel(
             uploaded_file,
-            sheet_name=sheet
+            sheet_name=sheet,
+            header=None,
+            dtype=str
         )
+
+        df.columns = [str(col) for col in df.columns]
 
         st.dataframe(df)
