@@ -204,29 +204,46 @@ if uploaded_file:
             f"{row['Perf YTD']:.2%}"
         )
 
-    # =================================================
-    # TABLEAU CLASSEMENT
-    # =================================================
+   ranking_display = ranking.copy()
 
-    st.markdown("---")
-
-    st.subheader("🏆 Classement")
-
-    ranking_display = ranking.copy()
-
-    ranking_display = ranking_display[
-        [
-            "Rang",
-            "Fonds",
-            "Perf YTD",
-            "Perf Annualisée",
-            "Volatilité",
-            "Sharpe",
-            "Treynor",
-            "IR"
-        ]
+ranking_display = ranking_display[
+    [
+        "Rang",
+        "Fonds",
+        "Perf YTD",
+        "Perf Annualisée",
+        "Volatilité",
+        "Sharpe",
+        "Treynor",
+        "IR"
     ]
+]
 
-    ranking_display["Perf YTD"] = (
-        ranking_display["Perf YTD"]
-        .map(lambda x: f"{x:.2%}
+ranking_display["Perf YTD"] = ranking_display["Perf YTD"].apply(
+    lambda x: "{:.2%}".format(x)
+)
+
+ranking_display["Perf Annualisée"] = ranking_display["Perf Annualisée"].apply(
+    lambda x: "{:.2%}".format(x)
+)
+
+ranking_display["Volatilité"] = ranking_display["Volatilité"].apply(
+    lambda x: "{:.2%}".format(x)
+)
+
+ranking_display["Treynor"] = ranking_display["Treynor"].apply(
+    lambda x: "{:.2%}".format(x)
+)
+
+ranking_display["Sharpe"] = ranking_display["Sharpe"].apply(
+    lambda x: "{:.2f}".format(x)
+)
+
+ranking_display["IR"] = ranking_display["IR"].apply(
+    lambda x: "{:.2f}".format(x)
+)
+
+st.dataframe(
+    ranking_display,
+    width="stretch"
+)
