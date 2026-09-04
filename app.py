@@ -3,7 +3,7 @@ import pandas as pd
 
 st.set_page_config(layout="wide")
 
-st.title("Diagnostic OPCVM")
+st.title("Diagnostic Data_Analysis")
 
 uploaded_file = st.file_uploader(
     "Importer le fichier Excel",
@@ -12,11 +12,6 @@ uploaded_file = st.file_uploader(
 
 if uploaded_file:
 
-    xls = pd.ExcelFile(uploaded_file)
-
-    st.write("Feuilles trouvées :")
-    st.write(xls.sheet_names)
-
     df = pd.read_excel(
         uploaded_file,
         sheet_name="Data_Analysis",
@@ -24,8 +19,6 @@ if uploaded_file:
     )
 
     st.write("Dimensions :", df.shape)
-
-    st.subheader("20 premières lignes")
 
     st.dataframe(
         df.head(20).astype(str),
