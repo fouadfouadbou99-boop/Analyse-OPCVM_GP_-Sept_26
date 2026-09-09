@@ -52,46 +52,40 @@ uploaded_file = st.file_uploader(
 # ======================================================
 
 if uploaded_file:
-    st.write("Fichier :", uploaded_file.name)
-
-    xls = pd.ExcelFile(uploaded_file)
-
-    st.write("Feuilles détectées :")
-    st.write([repr(s) for s in xls.sheet_names])
 
     metrics = pd.read_excel(
-    uploaded_file,
-    sheet_name="Metrics",
-    header=None
-)
+        uploaded_file,
+        sheet_name="Metrics",
+        header=None
+    )
 
-funds = metrics.iloc[1, 1:16].tolist()
+    funds = metrics.iloc[1, 1:16].tolist()
 
-perf_ytd = metrics.iloc[2, 1:16].astype(float)
-perf_ann = metrics.iloc[3, 1:16].astype(float)
-vol = metrics.iloc[4, 1:16].astype(float)
-te = metrics.iloc[6, 1:16].astype(float)
-sharpe = metrics.iloc[7, 1:16].astype(float)
-beta = metrics.iloc[8, 1:16].astype(float)
-treynor = metrics.iloc[9, 1:16].astype(float)
-ir = metrics.iloc[10, 1:16].astype(float)
-var95 = metrics.iloc[11, 1:16].astype(float)
+    perf_ytd = metrics.iloc[2, 1:16].astype(float)
+    perf_ann = metrics.iloc[3, 1:16].astype(float)
+    vol = metrics.iloc[4, 1:16].astype(float)
+    te = metrics.iloc[6, 1:16].astype(float)
+    sharpe = metrics.iloc[7, 1:16].astype(float)
+    beta = metrics.iloc[8, 1:16].astype(float)
+    treynor = metrics.iloc[9, 1:16].astype(float)
+    ir = metrics.iloc[10, 1:16].astype(float)
+    var95 = metrics.iloc[11, 1:16].astype(float)
 
-ranking = pd.DataFrame({
-    "Fonds": funds,
-    "Perf YTD": perf_ytd,
-    "Perf Annualisée": perf_ann,
-    "Volatilité": vol,
-    "Tracking Error": te,
-    "Sharpe": sharpe,
-    "Beta": beta,
-    "Treynor": treynor,
-    "IR": ir,
-    "VaR95": var95
-})
+    ranking = pd.DataFrame({
+        "Fonds": funds,
+        "Perf YTD": perf_ytd,
+        "Perf Annualisée": perf_ann,
+        "Volatilité": vol,
+        "Tracking Error": te,
+        "Sharpe": sharpe,
+        "Beta": beta,
+        "Treynor": treynor,
+        "IR": ir,
+        "VaR95": var95
+    })
 
     ranking = ranking.sort_values(
-        "Perf YTD",
+        by="Perf YTD",
         ascending=False
     )
 
@@ -149,15 +143,8 @@ ranking = pd.DataFrame({
     for col, (_, row) in zip(cols, top3.iterrows()):
 
         col.metric(
-
-            "#{} {}".format(
-                int(row["Rang"]),
-                row["Fonds"]
-            ),
-
-            "{:.2%}".format(
-                row["Perf YTD"]
-            )
+            f"#{int(row['Rang'])} {row['Fonds']}",
+            "{:.2%}".format(row["Perf YTD"])
         )
 
     # ==================================================
@@ -208,7 +195,7 @@ ranking = pd.DataFrame({
 
     st.dataframe(
         display_df,
-        width="stretch"
+        use_container_width=True
     )
 
     # ==================================================
