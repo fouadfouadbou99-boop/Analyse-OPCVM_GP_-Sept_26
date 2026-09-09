@@ -52,7 +52,10 @@ uploaded_file = st.file_uploader(
 # ======================================================
 
 if uploaded_file:
+st.write(uploaded_file.name)
 
+xls = pd.ExcelFile(uploaded_file)
+st.write(xls.sheet_names)
     metrics = pd.read_excel(
         uploaded_file,
         sheet_name="Metrics",
