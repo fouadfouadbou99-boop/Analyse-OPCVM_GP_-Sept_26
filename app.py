@@ -52,17 +52,18 @@ uploaded_file = st.file_uploader(
 # ======================================================
 
 if uploaded_file:
-st.write(uploaded_file.name)
+    st.write("Fichier :", uploaded_file.name)
 
-xls = pd.ExcelFile(uploaded_file)
-st.write(xls.sheet_names)
+    xls = pd.ExcelFile(uploaded_file)
+
+    st.write("Feuilles détectées :")
+    st.write([repr(s) for s in xls.sheet_names])
+
     metrics = pd.read_excel(
         uploaded_file,
         sheet_name="Metrics",
         header=None
     )
-
-    funds = metrics.iloc[1, 1:16].tolist()
 
     perf_ytd = metrics.iloc[2, 1:16].astype(float)
 
