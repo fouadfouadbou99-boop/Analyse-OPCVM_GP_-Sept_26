@@ -2,19 +2,11 @@ import streamlit as st
 import pandas as pd
 from io import BytesIO
 
-# ======================================================
-# CONFIGURATION
-# ======================================================
-
 st.set_page_config(
     page_title="OPCVM Analytics",
     page_icon="📈",
     layout="wide"
 )
-
-# ======================================================
-# TITRE
-# ======================================================
 
 st.title("📈 OPCVM Analytics")
 
@@ -29,26 +21,14 @@ st.markdown("""
 - Classement
 """)
 
-# ======================================================
-# SIDEBAR
-# ======================================================
-
 with st.sidebar:
     st.header("Paramètres")
     st.metric("Taux sans risque", "2.25 %")
-
-# ======================================================
-# IMPORT
-# ======================================================
 
 uploaded_file = st.file_uploader(
     "Importer le fichier Excel",
     type=["xlsx"]
 )
-
-# ======================================================
-# ANALYSE
-# ======================================================
 
 if uploaded_file:
 
@@ -56,87 +36,75 @@ if uploaded_file:
 
         metrics = pd.read_excel(
             uploaded_file,
-            sheet_name="Metrics",
-            header=None
+            sheet_name="Metrics"
         )
 
-        nb_cols = metrics.shape[1]
-
-        funds = metrics.iloc[1, 1:nb_cols].tolist()
+        funds = metrics.columns[1:].tolist()
 
         perf_ytd = pd.to_numeric(
-            metrics.iloc[2, 1:nb_cols],
+            metrics.iloc[0, 1:],
             errors="coerce"
         )
 
         perf_ann = pd.to_numeric(
-            metrics.iloc[3, 1:nb_cols],
+            metrics.iloc[1, 1:],
             errors="coerce"
         )
 
         vol = pd.to_numeric(
-            metrics.iloc[4, 1:nb_cols],
+            metrics.iloc[2, 1:],
             errors="coerce"
         )
 
         te = pd.to_numeric(
-            metrics.iloc[6, 1:nb_cols],
+            metrics.iloc[4, 1:],
             errors="coerce"
         )
 
         sharpe = pd.to_numeric(
-            metrics.iloc[7, 1:nb_cols],
+            metrics.iloc[5, 1:],
             errors="coerce"
         )
 
         beta = pd.to_numeric(
-            metrics.iloc[8, 1:nb_cols],
+            metrics.iloc[6, 1:],
             errors="coerce"
         )
 
         treynor = pd.to_numeric(
-            metrics.iloc[9, 1:nb_cols],
+            metrics.iloc[7, 1:],
             errors="coerce"
         )
 
         ir = pd.to_numeric(
-            metrics.iloc[10, 1:nb_cols],
+            metrics.iloc[8, 1:],
             errors="coerce"
         )
 
         var95 = pd.to_numeric(
-            metrics.iloc[11, 1:nb_cols],
+            metrics.iloc[9, 1:],
             errors="coerce"
         )
 
         ranking = pd.DataFrame({
             "Fonds": funds,
-            "Perf YTD": perf_ytd,
-            "Perf Annualisée": perf_ann,
-            "Volatilité": vol,
-            "Tracking Error": te,
-            "Sharpe": sharpe,
-            "Beta": beta,
-            "Treynor": treynor,
-            "IR": ir,
-            "VaR95": var95
+            "Perf YTD": perf_ytd.values,
+            "Perf Annualisée": perf_ann.values,
+            "Volatilité": vol.values,
+            "Tracking Error": te.values,
+            "Sharpe": sharpe.values,
+            "Beta": beta.values,
+            "Treynor": treynor.values,
+            "IR": ir.values,
+            "VaR95": var95.values
         })
-
-        ranking = ranking.dropna(subset=["Fonds"])
 
         ranking = ranking.sort_values(
             by="Perf YTD",
             ascending=False
-        )
+        ).reset_index(drop=True)
 
-        ranking["Rang"] = range(
-            1,
-            len(ranking) + 1
-        )
-
-        # ==================================================
-        # KPI
-        # ==================================================
+        ranking["Rang"] = ranking.index + 1
 
         st.markdown("---")
 
@@ -144,7 +112,7 @@ if uploaded_file:
 
         c1.metric(
             "🏆 Meilleur OPCVM",
-            str(ranking.iloc[0]["Fonds"])
+            ranking.iloc[0]["Fonds"]
         )
 
         c2.metric(
@@ -162,12 +130,7 @@ if uploaded_file:
             f"{ranking['IR'].max():.2f}"
         )
 
-        # ==================================================
-        # TOP 3
-        # ==================================================
-
         st.markdown("---")
-
         st.subheader("🥇 Top 3 OPCVM")
 
         top3 = ranking.head(3)
@@ -176,38 +139,40 @@ if uploaded_file:
 
         for col, (_, row) in zip(cols, top3.iterrows()):
             col.metric(
-                f"#{int(row['Rang'])} {row['Fonds']}",
+                f"#{row['Rang']} {row['Fonds']}",
                 f"{row['Perf YTD']:.2%}"
             )
 
-        # ==================================================
-        # CLASSEMENT
-        # ==================================================
-
         st.markdown("---")
-
         st.subheader("🏆 Classement")
 
         display_df = ranking.copy()
 
-        display_df["Perf YTD"] = display_df["Perf YTD"].map(lambda x: f"{x:.2%}")
-        display_df["Perf Annualisée"] = display_df["Perf Annualisée"].map(lambda x: f"{x:.2%}")
-        display_df["Volatilité"] = display_df["Volatilité"].map(lambda x: f"{x:.2%}")
-        display_df["Tracking Error"] = display_df["Tracking Error"].map(lambda x: f"{x:.2%}")
-        display_df["Treynor"] = display_df["Treynor"].map(lambda x: f"{x:.2%}")
-        display_df["VaR95"] = display_df["VaR95"].map(lambda x: f"{x:.2%}")
-        display_df["Sharpe"] = display_df["Sharpe"].map(lambda x: f"{x:.2f}")
-        display_df["IR"] = display_df["IR"].map(lambda x: f"{x:.2f}")
-        display_df["Beta"] = display_df["Beta"].map(lambda x: f"{x:.2f}")
+        for col in [
+            "Perf YTD",
+            "Perf Annualisée",
+            "Volatilité",
+            "Tracking Error",
+            "Treynor",
+            "VaR95"
+        ]:
+            display_df[col] = display_df[col].apply(
+                lambda x: f"{x:.2%}"
+            )
+
+        for col in [
+            "Sharpe",
+            "IR",
+            "Beta"
+        ]:
+            display_df[col] = display_df[col].apply(
+                lambda x: f"{x:.2f}"
+            )
 
         st.dataframe(
             display_df,
-            use_container_width=True
+            width="stretch"
         )
-
-        # ==================================================
-        # EXPORT EXCEL
-        # ==================================================
 
         output = BytesIO()
 
@@ -223,7 +188,7 @@ if uploaded_file:
             )
 
         st.download_button(
-            label="📥 Télécharger Excel",
+            "📥 Télécharger Excel",
             data=output.getvalue(),
             file_name="Classement_OPCVM.xlsx",
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
