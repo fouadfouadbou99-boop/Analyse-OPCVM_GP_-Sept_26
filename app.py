@@ -2,6 +2,10 @@ import streamlit as st
 import pandas as pd
 from io import BytesIO
 
+# ======================================================
+# CONFIGURATION
+# ======================================================
+
 st.set_page_config(
     page_title="OPCVM Analytics",
     page_icon="📈",
@@ -15,7 +19,7 @@ st.set_page_config(
 st.title("📈 OPCVM Analytics")
 
 st.markdown("""
-Tableau de bord OPCVM Actions
+### Tableau de bord OPCVM Actions
 
 - Performance YTD
 - Performance annualisée
@@ -43,7 +47,7 @@ uploaded_file = st.file_uploader(
 )
 
 # ======================================================
-# LECTURE
+# ANALYSE
 # ======================================================
 
 if uploaded_file:
@@ -56,10 +60,8 @@ if uploaded_file:
             header=None
         )
 
-        # Nombre réel de colonnes du fichier
         nb_cols = metrics.shape[1]
 
-        # Lecture dynamique
         funds = metrics.iloc[1, 1:nb_cols].tolist()
 
         perf_ytd = pd.to_numeric(
@@ -120,9 +122,7 @@ if uploaded_file:
             "VaR95": var95
         })
 
-        ranking = ranking.dropna(
-            subset=["Fonds"]
-        )
+        ranking = ranking.dropna(subset=["Fonds"])
 
         ranking = ranking.sort_values(
             by="Perf YTD",
@@ -190,30 +190,46 @@ if uploaded_file:
 
         display_df = ranking.copy()
 
-        display_df["Perf YTD"] = display_df["Perf YTD"].map(
-            lambda x: f"{x:.2%}"
+        display_df["Perf YTD"] = display_df["Perf YTD"].map(lambda x: f"{x:.2%}")
+        display_df["Perf Annualisée"] = display_df["Perf Annualisée"].map(lambda x: f"{x:.2%}")
+        display_df["Volatilité"] = display_df["Volatilité"].map(lambda x: f"{x:.2%}")
+        display_df["Tracking Error"] = display_df["Tracking Error"].map(lambda x: f"{x:.2%}")
+        display_df["Treynor"] = display_df["Treynor"].map(lambda x: f"{x:.2%}")
+        display_df["VaR95"] = display_df["VaR95"].map(lambda x: f"{x:.2%}")
+        display_df["Sharpe"] = display_df["Sharpe"].map(lambda x: f"{x:.2f}")
+        display_df["IR"] = display_df["IR"].map(lambda x: f"{x:.2f}")
+        display_df["Beta"] = display_df["Beta"].map(lambda x: f"{x:.2f}")
+
+        st.dataframe(
+            display_df,
+            use_container_width=True
         )
 
-        display_df["Perf Annualisée"] = display_df["Perf Annualisée"].map(
-            lambda x: f"{x:.2%}"
+        # ==================================================
+        # EXPORT EXCEL
+        # ==================================================
+
+        output = BytesIO()
+
+        with pd.ExcelWriter(
+            output,
+            engine="xlsxwriter"
+        ) as writer:
+
+            ranking.to_excel(
+                writer,
+                sheet_name="Classement",
+                index=False
+            )
+
+        st.download_button(
+            label="📥 Télécharger Excel",
+            data=output.getvalue(),
+            file_name="Classement_OPCVM.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
 
-        display_df["Volatilité"] = display_df["Volatilité"].map(
-            lambda x: f"{x:.2%}"
-        )
+        st.success("Analyse terminée.")
 
-        display_df["Tracking Error"] = display_df["Tracking Error"].map(
-            lambda x: f"{x:.2%}"
-        )
-
-        display_df["Treynor"] = display_df["Treynor"].map(
-            lambda x: f"{x:.2%}"
-        )
-
-        display_df["VaR95"] = display_df["VaR95"].map(
-            lambda x: f"{x:.2%}"
-        )
-
-      display_df["Sharpe"] = display_df["Sharpe"].map(
-    lambda x: f"{x:.2f}"
-)
+    except Exception as e:
+        st.error(f"Erreur : {e}")
