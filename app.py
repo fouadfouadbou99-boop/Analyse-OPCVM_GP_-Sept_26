@@ -59,7 +59,11 @@ if uploaded_file:
             sheet_name="Metrics",
             header=None
         )
+st.write("Nom du fichier :", uploaded_file.name)
 
+st.write("Dimensions :", metrics.shape)
+
+st.dataframe(metrics.iloc[0:12, 0:10])
         nb_cols = metrics.shape[1]
 
         funds = metrics.iloc[1, 1:nb_cols].tolist()
