@@ -214,4 +214,6 @@ if uploaded_file:
             lambda x: f"{x:.2%}"
         )
 
-        display_df["Sharpe
+      display_df["Sharpe"] = display_df["Sharpe"].map(
+    lambda x: f"{x:.2f}"
+)
