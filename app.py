@@ -51,15 +51,18 @@ uploaded_file = st.file_uploader(
 # LECTURE
 # ======================================================
 
-if uploaded_file:
+metrics = pd.read_excel(
+    uploaded_file,
+    sheet_name="Metrics",
+    header=None
+)
 
-    metrics = pd.read_excel(
-        uploaded_file,
-        sheet_name="Metrics",
-        header=None
-    )
+st.write("Dimensions du fichier :", metrics.shape)
 
-    funds = metrics.iloc[1, 1:16].tolist()
+st.subheader("Contrôle des données lues")
+st.dataframe(metrics.head(15))
+
+funds = metrics.iloc[1, 1:16].tolist()
 
     perf_ytd = metrics.iloc[2, 1:16].astype(float)
     perf_ann = metrics.iloc[3, 1:16].astype(float)
