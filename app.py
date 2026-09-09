@@ -95,7 +95,7 @@ if uploaded_file:
         "Treynor": treynor,
         "IR": ir,
         "VaR95": var95
-
+funds = metrics.iloc[1, 1:16].tolist()
     })
 
     ranking = ranking.sort_values(
